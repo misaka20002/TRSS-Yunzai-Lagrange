@@ -66,6 +66,7 @@ git remote set-url origin https://github.com/AIGC-Yunzai/TRSS-Yunzai-Lagrange.gi
 # git remote set-url origin https://ghfast.top/https://github.com/AIGC-Yunzai/TRSS-Yunzai-Lagrange.git
 git fetch --all
 git reset --hard origin/main
+pnpm i
 ```
 
 ### 方法三 直接替换文件
