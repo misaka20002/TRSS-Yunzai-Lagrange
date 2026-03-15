@@ -800,6 +800,7 @@ Bot.adapter.push(
         sendForwardMsg: this.sendFriendForwardMsg.bind(this, i),
         sendFile: this.sendFriendFile.bind(this, i),
         getInfo: this.getFriendInfo.bind(this, i),
+        getSimpleInfo: this.getFriendInfo.bind(this, i),
         getAvatarUrl() {
           return this.avatar || `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}`
         },

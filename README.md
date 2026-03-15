@@ -1,29 +1,39 @@
 # Fork 概要
 
 - 适配 [Lagrange.Onebot v1](https://github.com/misaka20002/Lagrange.Core)
-- 已全面适配 [Napcat](https://napneko.github.io/guide/napcat)
+- 已全面适配 [Napcat](https://napneko.github.io/guide/napcat) Onebot11 Api
 - 11月22日更新： 由于目前 Lagr 已经关闭签名服务器，推荐转移到纯本地签名的 Napcat 平台
 
 ## 已调整适配器适配
 
-| method              | api                     | about                                  |
-| ------------------- | ----------------------- | -------------------------------------- |
-| pokeMember          | group_poke              | 群聊戳一戳                             |
-| getFriendMsgHistory | get_friend_msg_history  | 适配 message_id 以获取历史消息         |
-| getGroupMsgHistory  | get_group_msg_history   | 适配 message_id 以获取历史消息         |
-| ~~sendFriendFile~~  | ~~upload_private_file~~ | ~~发送文件，适配 file 仅支持本地Path~~ |
+### Group:
+
+| method             | api                   | about                          |
+| ------------------ | --------------------- | ------------------------------ |
+| pokeMember         | group_poke            | 群聊戳一戳                     |
+| getGroupMsgHistory | get_group_msg_history | 适配 message_id 以获取历史消息 |
+
+<!-- | ~~sendFriendFile~~  | ~~upload_private_file~~ | ~~发送文件，适配 file 仅支持本地Path~~ |
 | ~~sendGroupFile~~   | ~~upload_group_file~~   | ~~发送文件，适配 file 仅支持本地Path~~ |
 
 ~~### 呆毛 Fork 版 Lagrange.Onebot~~
 
 ~~- 已经从源头（Lagrange.Onebot）上修复了 `upload_private_file` `upload_group_file` 文件 Base64 发送~~
-~~- 下载地址：[呆毛 Fork 版 Lagrange.Onebot](https://github.com/misaka20002/Lagrange.Core)~~
+~~- 下载地址：[呆毛 Fork 版 Lagrange.Onebot](https://github.com/misaka20002/Lagrange.Core)~~ -->
+
+### Member:
+
+| method              | api                    | about                          |
+| ------------------- | ---------------------- | ------------------------------ |
+| getFriendMsgHistory | get_friend_msg_history | 适配 message_id 以获取历史消息 |
+| getSimpleInfo       | get_stranger_info      | icqq 获取非好友信息            |
 
 ## 已调整参数
 
-| parameter | about                          |
-| --------- | ------------------------------ |
-| e.source  | icqq 引用消息参数 e.source.seq |
+| parameter                            | about                          |
+| ------------------------------------ | ------------------------------ |
+| e.source                             | icqq 引用消息参数 e.source.seq |
+| {request_type,sub_type,nickname}[^1] | 入群申请补充用户昵称           |
 
 ## 已调整逻辑
 
