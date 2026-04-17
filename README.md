@@ -69,6 +69,9 @@
 
 ### 方法二 切换 TRSS 版本到本仓库
 
+> [!TIP]
+> `切换 TRSS 版本到本仓库` 并不需要重新配置任何东西
+
 ```bash
 # 在你的 TRSS 根目录执行
 git remote set-url origin https://github.com/AIGC-Yunzai/TRSS-Yunzai-NapC.git
