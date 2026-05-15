@@ -41,7 +41,8 @@
     "strip-ansi": "^7.2.0",
     "ulid": "^3.0.2",
     "ws": "^8.20.0",
-    "yaml": "^2.8.4"
+    "yaml": "^2.8.4",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "prettier": "^3.8.3"
