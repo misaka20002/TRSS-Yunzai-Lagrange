@@ -40,8 +40,8 @@
     "sqlite3": "5.1.7",
     "strip-ansi": "^7.2.0",
     "ulid": "^3.0.2",
-    "ws": "^8.20.0",
-    "yaml": "^2.8.4",
+    "ws": "^8.20.1",
+    "yaml": "^2.9.0",
     "sharp": "^0.33.5"
   },
   "devDependencies": {
@@ -50,20 +50,5 @@
   "imports": {
     "#miao": "./plugins/miao-plugin/components/index.js",
     "#miao.models": "./plugins/miao-plugin/models/index.js"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sqlite3",
-      "classic-level",
-      "log4js",
-      "puppeteer",
-      "sharp"
-    ],
-    "patchedDependencies": {
-      "body-parser@2": "lib/modules/body-parser.patch",
-      "compression": "lib/modules/compression.patch",
-      "log4js": "lib/modules/log4js.patch",
-      "streamroller": "lib/modules/streamroller.patch"
-    }
   }
 }
