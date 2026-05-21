@@ -159,6 +159,10 @@ Bot.adapter.push(
       return msg
     }
 
+    async getPrivateFileUrl(data, file_id) {
+      return (await data.bot.sendApi("get_private_file_url", { file_id })).url
+    }
+
     sendGroupMsg(data, msg) {
       return this.sendMsg(
         msg,
@@ -734,6 +738,10 @@ Bot.adapter.push(
       })
     }
 
+    async getGroupFileDownloadUrl(data, file_id) {
+      return (await this.getGroupFileUrl(data, file_id)).url
+    }
+
     getGroupFs(data) {
       return {
         upload: this.sendGroupFile.bind(this, data),
@@ -808,6 +816,7 @@ Bot.adapter.push(
         thumbUp: this.sendLike.bind(this, i),
         delete: this.deleteFriend.bind(this, i),
         poke: this.sendFriendPoke.bind(this, user_id), // 匹配拉格朗日非 onebot11 规范的戳一戳（但当前版本的拉格朗日的戳一戳无法使用）
+        getFileUrl: this.getPrivateFileUrl.bind(this, i),
         getLocalFileInfo: this.getLocalFileInfo.bind(this, i),
       }
     }
@@ -913,6 +922,7 @@ Bot.adapter.push(
         setEmojiLike: this.setEmojiLike.bind(this, i),
         getAiCharacters: this.getAiCharacters.bind(this, i),
         sendGroupAiRecord: this.sendGroupAiRecord.bind(this, i),
+        getFileUrl: this.getGroupFileDownloadUrl.bind(this, i),
         getLocalFileInfo: this.getLocalFileInfo.bind(this, i),
         setName: this.setGroupName.bind(this, i),
         setAvatar: this.setGroupAvatar.bind(this, i),
