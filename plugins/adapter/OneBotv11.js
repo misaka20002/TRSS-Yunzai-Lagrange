@@ -214,8 +214,14 @@ Bot.adapter.push(
     parseMsg(msg) {
       const array = []
       for (const i of Array.isArray(msg) ? msg : [msg])
-        if (typeof i === "object") array.push({ ...i.data, type: i.type })
-        else array.push({ type: "text", text: String(i) })
+        if (typeof i === "object") {
+          const message = { ...i.data, type: i.type }
+          if (message.type === "file") {
+            message.fid ||= message.file_id
+            message.name ||= message.file
+          }
+          array.push(message)
+        } else array.push({ type: "text", text: String(i) })
       return array
     }
 
@@ -1214,8 +1220,13 @@ Bot.adapter.push(
             post_type: "message",
             message_type: "group",
             sub_type: "normal",
-            message: [{ ...data.file, type: "file" }],
-            raw_message: `[文件：${data.file.name}]`,
+            message: [{
+              ...data.file,
+              fid: data.file.fid || data.file.file_id,
+              name: data.file.file || data.file.name,
+              type: "file",
+            }],
+            raw_message: `[文件：${data.file.file || data.file.name}]`,
           })
           break
         case "group_ban":
@@ -1343,8 +1354,13 @@ Bot.adapter.push(
             post_type: "message",
             message_type: "private",
             sub_type: "friend",
-            message: [{ ...data.file, type: "file" }],
-            raw_message: `[文件：${data.file.name}]`,
+            message: [{
+              ...data.file,
+              fid: data.file.fid || data.file.file_id,
+              name: data.file.file || data.file.name,
+              type: "file",
+            }],
+            raw_message: `[文件：${data.file.file || data.file.name}]`,
           })
           break
         case "client_status":
