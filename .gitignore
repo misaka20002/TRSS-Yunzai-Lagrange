@@ -3,6 +3,7 @@
 /logs
 /node_modules
 /plugins/*
+/Nai3Zip/*
 !/plugins/adapter
 !/plugins/system
 !/plugins/other
