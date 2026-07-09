@@ -61,6 +61,7 @@ Bot.adapter.push(
       if (!Array.isArray(msg)) msg = [msg]
       const msgs = []
       const forward = []
+      const files = []
       for (let i of msg) {
         if (typeof i !== "object") i = { type: "text", data: { text: i } }
         else if (!i.data) i = { type: i.type, data: { ...i, type: undefined } }
@@ -77,27 +78,35 @@ Bot.adapter.push(
           case "node":
             forward.push(...i.data)
             continue
+          case "file":
+            files.push({ file: i.data.file, name: i.data.name })
+            continue
           case "raw":
             i = i.data
             break
         }
 
-        if (i.data.file) i.data.file = await this.makeFile(i.data.file) // 原版
-        // if (i.data.file && i.type != "file") i.data.file = await this.makeFile(i.data.file) // 2025年9月27日 已修复 拉格朗日，file 可以使用 base64 了 // 特殊匹配拉格朗日，segment.flie 直接使用文件路径
+        if (i.data?.file) i.data.file = await this.makeFile(i.data.file)
 
         msgs.push(i)
       }
-      return [msgs, forward]
+      return [msgs, forward, files]
     }
 
-    async sendMsg(msg, send, sendForwardMsg) {
-      const [message, forward] = await this.makeMsg(msg)
+    async sendMsg(msg, send, sendForwardMsg, sendFile) {
+      const [message, forward, files] = await this.makeMsg(msg)
       const ret = []
 
       if (forward.length) {
         const data = await sendForwardMsg(forward)
         if (Array.isArray(data)) ret.push(...data)
         else ret.push(data)
+      }
+
+      for (const { file, name } of files) {
+        if (sendFile) {
+          ret.push(await sendFile(file, name || path.basename(file)))
+        }
       }
 
       if (message.length) ret.push(await send(message))
@@ -124,6 +133,7 @@ Bot.adapter.push(
           })
         },
         msg => this.sendFriendForwardMsg(data, msg),
+        (file, name) => this.sendFriendFile(data, file, name),
       )
     }
 
@@ -131,27 +141,59 @@ Bot.adapter.push(
       Bot.makeLog("info", `回应群消息：${this.makeLog(message_id)}`, `${data.emoji_id}`, true)
       return data.bot.sendApi("set_msg_emoji_like", {
         emoji_id: emoji_id,
-        message_id: message_id, 
+        message_id: message_id,
       })
     }
-  
+
     getAiCharacters(data, type) {
       Bot.makeLog("info", `获取群${this.makeLog(data.group_id)}AI音色信息`, `${type}`, true)
       return data.bot.sendApi("get_ai_characters", {
         chat_type: type,
-        group_id: data.group_id, 
+        group_id: data.group_id,
       })
     }
-  
+
     sendGroupAiRecord(data, character_id, text) {
       Bot.makeLog("info", `发送${this.makeLog(character_id)}语音`, `${data.self_id} => ${data.group_id}`, true)
       return data.bot.sendApi("send_group_ai_record", {
         character: character_id,
-        group_id: data.group_id, 
-        text:text
+        group_id: data.group_id,
+        text: text
       })
     }
-  
+
+    async getLocalFileInfo(data, file_id) {
+      const msg = (await data.bot.sendApi("get_file", { file_id })).data
+      if (msg?.message)
+        msg.message = this.parseMsg(msg.message)
+      return msg
+    }
+
+    setEmojiLike(data, message_id, emoji_id) {
+      Bot.makeLog("info", `回应群消息：${this.makeLog(message_id)}`, `${data.emoji_id}`, true)
+      return data.bot.sendApi("set_msg_emoji_like", {
+        emoji_id: emoji_id,
+        message_id: message_id,
+      })
+    }
+
+    getAiCharacters(data, type) {
+      Bot.makeLog("info", `获取群${this.makeLog(data.group_id)}AI音色信息`, `${type}`, true)
+      return data.bot.sendApi("get_ai_characters", {
+        chat_type: type,
+        group_id: data.group_id,
+      })
+    }
+
+    sendGroupAiRecord(data, character_id, text) {
+      Bot.makeLog("info", `发送${this.makeLog(character_id)}语音`, `${data.self_id} => ${data.group_id}`, true)
+      return data.bot.sendApi("send_group_ai_record", {
+        character: character_id,
+        group_id: data.group_id,
+        text: text
+      })
+    }
+
     async getLocalFileInfo(data, file_id) {
       const msg = (await data.bot.sendApi("get_file", { file_id })).data
       if (msg?.message)
@@ -175,6 +217,7 @@ Bot.adapter.push(
           })
         },
         msg => this.sendGroupForwardMsg(data, msg),
+        (file, name) => this.sendGroupFile(data, file, undefined, name),
       )
     }
 
@@ -640,6 +683,28 @@ Bot.adapter.push(
       })
     }
 
+    async sendGroupNotice(data, content, opts = {}) {
+      Bot.makeLog(
+        "info",
+        [`发送群公告：${content}`, opts],
+        `${data.self_id} => ${data.group_id}`,
+        true,
+      )
+      if (opts.image) opts.image = await this.makeFile(opts.image)
+      return data.bot.sendApi("_send_group_notice", {
+        group_id: data.group_id,
+        content,
+        ...opts,
+      })
+    }
+
+    getGroupNotice(data) {
+      Bot.makeLog("info", "获取群公告", `${data.self_id} => ${data.group_id}`, true)
+      return data.bot.sendApi("_get_group_notice", {
+        group_id: data.group_id,
+      })
+    }
+
     downloadFile(data, url, thread_count, headers) {
       return data.bot.sendApi("download_file", {
         url,
@@ -658,7 +723,7 @@ Bot.adapter.push(
       const uploadFile = (await this.makeFile(file, { file: true })).replace("file://", "")
       return data.bot.sendApi("upload_private_file", {
         user_id: data.user_id,
-        file: uploadFile, // 2025年9月27日 已修复 拉格朗日，file 可以使用 base64 了 // 匹配拉格朗日，直接使用文件路径
+        file: uploadFile,
         name,
       })
     }
@@ -683,7 +748,7 @@ Bot.adapter.push(
       return data.bot.sendApi("upload_group_file", {
         group_id: data.group_id,
         folder,
-        file: uploadFile, // 2025年9月27日 已修复 拉格朗日，file 可以使用 base64 了 // 匹配拉格朗日，直接使用文件路径
+        file: uploadFile,
         name,
       })
     }
@@ -948,6 +1013,11 @@ Bot.adapter.push(
         muteAll: this.setGroupWholeKick.bind(this, i),
         kickMember: this.setGroupKick.bind(this, i),
         quit: this.setGroupLeave.bind(this, i),
+        get announce() {
+          return this.sendNotice
+        },
+        sendNotice: this.sendGroupNotice.bind(this, i),
+        getNotice: this.getGroupNotice.bind(this, i),
         fs: this.getGroupFs(i),
         get is_owner() {
           return data.bot.gml.get(group_id)?.get(data.self_id)?.role === "owner"
